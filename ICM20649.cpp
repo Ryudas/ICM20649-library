@@ -164,10 +164,10 @@
 #define ICM20649_SHIFT_GYRO_DLPCFG       3                           /**< Gyro DLPF Config bit shift                 */
 #define ICM20649_MASK_GYRO_FULLSCALE     0x06                        /**< Gyro Full Scale Select bitmask             */
 #define ICM20649_MASK_GYRO_BW            0x39                        /**< Gyro Bandwidth Select bitmask              */
-#define ICM20649_GYRO_FULLSCALE_250DPS   (0x00 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 250 deg/sec  */
-#define ICM20649_GYRO_FULLSCALE_500DPS   (0x01 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 500 deg/sec  */
-#define ICM20649_GYRO_FULLSCALE_1000DPS  (0x02 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 1000 deg/sec */
-#define ICM20649_GYRO_FULLSCALE_2000DPS  (0x03 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 2000 deg/sec */
+#define ICM20649_GYRO_FULLSCALE_500DPS   (0x00 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 250 deg/sec  */
+#define ICM20649_GYRO_FULLSCALE_1000DPS   (0x01 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 500 deg/sec  */
+#define ICM20649_GYRO_FULLSCALE_2000DPS  (0x02 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 1000 deg/sec */
+#define ICM20649_GYRO_FULLSCALE_4000DPS  (0x03 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 2000 deg/sec */
 #define ICM20649_GYRO_BW_12100HZ         (0x00 << ICM20649_SHIFT_GYRO_DLPCFG)                                     /**< Gyro Bandwidth = 12100 Hz */
 #define ICM20649_GYRO_BW_360HZ           ( (0x07 << ICM20649_SHIFT_GYRO_DLPCFG) | ICM20649_BIT_GYRO_FCHOICE)      /**< Gyro Bandwidth = 360 Hz   */
 #define ICM20649_GYRO_BW_200HZ           ( (0x00 << ICM20649_SHIFT_GYRO_DLPCFG) | ICM20649_BIT_GYRO_FCHOICE)      /**< Gyro Bandwidth = 200 Hz   */
@@ -782,19 +782,19 @@ uint32_t ICM20649::get_gyro_resolution(float *gyroRes)
 
     /* Calculate the resolution */
     switch ( reg ) {
-        case ICM20649_GYRO_FULLSCALE_250DPS:
+        case ICM20649_GYRO_FULLSCALE_500DPS:
             *gyroRes = 250.0 / 32768.0;
             break;
 
-        case ICM20649_GYRO_FULLSCALE_500DPS:
+        case ICM20649_GYRO_FULLSCALE_1000DPS:
             *gyroRes = 500.0 / 32768.0;
             break;
 
-        case ICM20649_GYRO_FULLSCALE_1000DPS:
+        case ICM20649_GYRO_FULLSCALE_2000DPS:
             *gyroRes = 1000.0 / 32768.0;
             break;
 
-        case ICM20649_GYRO_FULLSCALE_2000DPS:
+        case ICM20649_GYRO_FULLSCALE_4000DPS:
             *gyroRes = 2000.0 / 32768.0;
             break;
     }
@@ -809,7 +809,7 @@ uint32_t ICM20649::get_gyro_resolution(float *gyroRes)
  * @param[in] accelFs
  *    The desired full scale value. Use the ICM20649_ACCEL_FULLSCALE_xG
  *    macros, which are defined in the ICM20649.h file. The value of x can be
- *    2, 4, 8 or 16.
+ *    4, 8, 16 or 30.
  *
  * @return
  *    Returns zero on OK, non-zero otherwise
@@ -834,7 +834,7 @@ uint32_t ICM20649::set_accel_fullscale(uint8_t accelFs)
  * @param[in] gyroFs
  *    The desired full scale value. Use the ICM20649_GYRO_FULLSCALE_yDPS
  *    macros, which are defined in the ICM20649.h file. The value of y can be
- *    250, 500, 1000 or 2000.
+ *    500, 1000, 2000 or 4000.
  *
  * @return
  *    Returns zero on OK, non-zero otherwise
@@ -1199,9 +1199,9 @@ uint32_t ICM20649::calibrate(float *accelBiasScaled, float *gyroBiasScaled)
     set_accel_bandwidth(ICM20649_ACCEL_BW_246HZ);
     set_gyro_bandwidth(ICM20649_GYRO_BW_12HZ);
 
-    /* Set the most sensitive range: 2G full scale and 250dps full scale */
+    /* Set the most sensitive range: 2G full scale and 500DPS full scale */
     set_accel_fullscale(ICM20649_ACCEL_FULLSCALE_2G);
-    set_gyro_fullscale(ICM20649_GYRO_FULLSCALE_250DPS);
+    set_gyro_fullscale(ICM20649_GYRO_FULLSCALE_500DPS);
 
     /* Retrieve the resolution per bit */
     get_accel_resolution(&accelRes);
@@ -1297,7 +1297,7 @@ uint32_t ICM20649::calibrate(float *accelBiasScaled, float *gyroBiasScaled)
     read_register(ICM20649_REG_ZG_OFFS_USRH, 2, &data[0]);
     gyroBiasStored[2] = ( (int16_t) (data[0] << 8) | data[1]);
 
-    /* The gyro bias should be stored in 1000dps full scaled format. We measured in 250dps to get */
+    /* The gyro bias should be stored in 2000DPS full scaled format. We measured in 500DPS to get */
     /* the best sensitivity, so need to divide by 4 */
     /* Substract from the stored calibration value */
     gyroBiasStored[0] -= gyroBias[0] / 4;
@@ -1404,8 +1404,8 @@ uint32_t ICM20649::calibrate_gyro(float *gyroBiasScaled)
     /* Configure bandwidth for gyroscope to 12Hz */
     set_gyro_bandwidth(ICM20649_GYRO_BW_12HZ);
 
-    /* Configure sensitivity to 250dps full scale */
-    set_gyro_fullscale(ICM20649_GYRO_FULLSCALE_250DPS);
+    /* Configure sensitivity to 500DPS full scale */
+    set_gyro_fullscale(ICM20649_GYRO_FULLSCALE_500DPS);
 
     /* Retrieve the resolution per bit */
     get_gyro_resolution(&gyroRes);
@@ -1488,7 +1488,7 @@ uint32_t ICM20649::calibrate_gyro(float *gyroBiasScaled)
     read_register(ICM20649_REG_ZG_OFFS_USRH, 2, &data[0]);
     gyroBiasStored[2] = ( (int16_t) (data[0] << 8) | data[1]);
 
-    /* The gyro bias should be stored in 1000dps full scaled format. We measured in 250dps to get */
+    /* The gyro bias should be stored in 2000DPS full scaled format. We measured in 500DPS to get */
     /* the best sensitivity, so need to divide by 4 */
     /* Substract from the stored calibration value */
     gyroBiasStored[0] -= gyroBias[0] / 4;
