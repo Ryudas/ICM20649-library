@@ -164,10 +164,10 @@
 #define ICM20649_SHIFT_GYRO_DLPCFG       3                           /**< Gyro DLPF Config bit shift                 */
 #define ICM20649_MASK_GYRO_FULLSCALE     0x06                        /**< Gyro Full Scale Select bitmask             */
 #define ICM20649_MASK_GYRO_BW            0x39                        /**< Gyro Bandwidth Select bitmask              */
-#define ICM20649_GYRO_FULLSCALE_500DPS   (0x00 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 250 deg/sec  */
-#define ICM20649_GYRO_FULLSCALE_1000DPS   (0x01 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 500 deg/sec  */
-#define ICM20649_GYRO_FULLSCALE_2000DPS  (0x02 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 1000 deg/sec */
-#define ICM20649_GYRO_FULLSCALE_4000DPS  (0x03 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 2000 deg/sec */
+#define ICM20649_GYRO_FULLSCALE_500DPS   (0x00 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 500 deg/sec  */
+#define ICM20649_GYRO_FULLSCALE_1000DPS   (0x01 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 1000 deg/sec  */
+#define ICM20649_GYRO_FULLSCALE_2000DPS  (0x02 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 2000 deg/sec */
+#define ICM20649_GYRO_FULLSCALE_4000DPS  (0x03 << ICM20649_SHIFT_GYRO_FS_SEL)    /**< Gyro Full Scale = 4000 deg/sec */
 #define ICM20649_GYRO_BW_12100HZ         (0x00 << ICM20649_SHIFT_GYRO_DLPCFG)                                     /**< Gyro Bandwidth = 12100 Hz */
 #define ICM20649_GYRO_BW_360HZ           ( (0x07 << ICM20649_SHIFT_GYRO_DLPCFG) | ICM20649_BIT_GYRO_FCHOICE)      /**< Gyro Bandwidth = 360 Hz   */
 #define ICM20649_GYRO_BW_200HZ           ( (0x00 << ICM20649_SHIFT_GYRO_DLPCFG) | ICM20649_BIT_GYRO_FCHOICE)      /**< Gyro Bandwidth = 200 Hz   */
@@ -743,19 +743,19 @@ uint32_t ICM20649::get_accel_resolution(float *accelRes)
     /* Calculate the resolution */
     switch ( reg ) {
         case ICM20649_ACCEL_FULLSCALE_2G:
-            *accelRes = 2.0 / 32768.0;
-            break;
-
-        case ICM20649_ACCEL_FULLSCALE_4G:
             *accelRes = 4.0 / 32768.0;
             break;
 
-        case ICM20649_ACCEL_FULLSCALE_8G:
+        case ICM20649_ACCEL_FULLSCALE_4G:
             *accelRes = 8.0 / 32768.0;
             break;
 
-        case ICM20649_ACCEL_FULLSCALE_16G:
+        case ICM20649_ACCEL_FULLSCALE_8G:
             *accelRes = 16.0 / 32768.0;
+            break;
+
+        case ICM20649_ACCEL_FULLSCALE_16G:
+            *accelRes = 30.0 / 32768.0;
             break;
     }
 
@@ -783,19 +783,19 @@ uint32_t ICM20649::get_gyro_resolution(float *gyroRes)
     /* Calculate the resolution */
     switch ( reg ) {
         case ICM20649_GYRO_FULLSCALE_500DPS:
-            *gyroRes = 250.0 / 32768.0;
-            break;
-
-        case ICM20649_GYRO_FULLSCALE_1000DPS:
             *gyroRes = 500.0 / 32768.0;
             break;
 
-        case ICM20649_GYRO_FULLSCALE_2000DPS:
+        case ICM20649_GYRO_FULLSCALE_1000DPS:
             *gyroRes = 1000.0 / 32768.0;
             break;
 
-        case ICM20649_GYRO_FULLSCALE_4000DPS:
+        case ICM20649_GYRO_FULLSCALE_2000DPS:
             *gyroRes = 2000.0 / 32768.0;
+            break;
+
+        case ICM20649_GYRO_FULLSCALE_4000DPS:
+            *gyroRes = 4000.0 / 32768.0;
             break;
     }
 
