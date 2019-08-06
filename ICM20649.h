@@ -3,7 +3,7 @@
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2017 Silicon Labs, http://www.silabs.com</b>
- * Changed by Elvis Borges, @TuDelft to interface with newer version of sensor
+ * Altered by Elvis Borges @TuDelft, to interface with newer version of sensor
  *******************************************************************************
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -128,6 +128,19 @@ public:
      */
     bool get_temperature(float *temperature);
 
+    /*------------------------------------------------------------------------------
+        Make a measurement of the external magnetometer sensor
+
+        @output [mag_x, mag_y, mag_z] mesurements on 3 respective axes
+
+        returns True for successful measurement
+
+    ------------------------------------------------------------------------------*/
+    bool get_magnetometer(float * mag_x, float * mag_y, float * mag_z);
+
+    
+
+
 private:
     /* Private functions */
     void     read_register(uint16_t addr, int numBytes, uint8_t *data);
@@ -139,24 +152,25 @@ private:
     float    set_accel_sample_rate(float sampleRate);
     uint32_t set_gyro_bandwidth(uint8_t gyroBw);
     uint32_t set_accel_bandwidth(uint8_t accelBw);
-    uint32_t read_accel_data(float *accel);
-    uint32_t read_gyro_data(float *gyro);
+    uint32_t read_accel_data(float * accel);
+    uint32_t read_gyro_data(float * gyro);
+    uint32_t read_mag_data(float * mag)
     uint32_t get_accel_resolution(float *accelRes);
     uint32_t get_gyro_resolution(float *gyroRes);
     uint32_t set_accel_fullscale(uint8_t accelFs);
     uint32_t set_gyro_fullscale(uint8_t gyroFs);
     uint32_t enable_sleepmode(bool enable);
     uint32_t enable_cyclemode(bool enable);
-    uint32_t enable_sensor(bool accel, bool gyro, bool temp);
+    uint32_t enable_sensor(bool accel, bool gyro, bool temp, bool mag);
     uint32_t enter_lowpowermode(bool enAccel, bool enGyro, bool enTemp);
     uint32_t enable_irq(bool dataReadyEnable, bool womEnable);
-    uint32_t read_irqstatus(uint32_t *int_status);
+    uint32_t read_irqstatus(uint32_t * int_status);
     bool     is_data_ready(void);
     uint32_t enable_wake_on_motion(bool enable, uint8_t womThreshold, float sampleRate);
-    uint32_t calibrate(float *accelBiasScaled, float *gyroBiasScaled);
-    uint32_t calibrate_gyro(float *gyroBiasScaled);
-    uint32_t read_temperature(float *temperature);
-    uint32_t get_device_id(uint8_t *device_id);
+    uint32_t calibrate(float * accelBiasScaled, float * gyroBiasScaled);
+    uint32_t calibrate_gyro(float * gyroBiasScaled);
+    uint32_t read_temperature(float * temperature);
+    uint32_t get_device_id(uint8_t * device_id);
 
     void irq_handler(void);
 

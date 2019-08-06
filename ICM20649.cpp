@@ -3,7 +3,7 @@
  *******************************************************************************
  * @section License
  * <b>(C) Copyright 2017 Silicon Labs, http://www.silabs.com</b>
- * Changed by Elvis Borges, @TuDelft to interface with newer version of sensor
+ * Altered by Elvis Borges @TuDelft, to interface with newer version of sensor
  *******************************************************************************
  *
  * SPDX-License-Identifier: Apache-2.0
