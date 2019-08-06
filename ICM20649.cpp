@@ -923,7 +923,7 @@ uint32_t ICM20649::enable_cyclemode(bool enable)
  * @return
  *    Returns zero on OK, non-zero otherwise
  ******************************************************************************/
-uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp)
+uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
 {
     uint8_t pwrManagement1;
     uint8_t pwrManagement2;
@@ -975,13 +975,13 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp)
  * @return
  *    Returns zero on OK, non-zero otherwise
  ******************************************************************************/
-uint32_t ICM20649::enter_lowpowermode(bool enAccel, bool enGyro, bool enTemp)
+uint32_t ICM20649::enter_lowpowermode(bool enAccel, bool enGyro, bool enTemp, bool enMag)
 {
     uint8_t data;
 
     read_register(ICM20649_REG_PWR_MGMT_1, 1, &data);
 
-    if ( enAccel || enGyro || enTemp ) {
+    if ( enAccel || enGyro || enTemp || enMag) {
         /* Make sure that the chip is not in sleep */
         enable_sleepmode(false);
 
@@ -989,7 +989,7 @@ uint32_t ICM20649::enter_lowpowermode(bool enAccel, bool enGyro, bool enTemp)
         enable_cyclemode(false);
 
         /* Enable the accelerometer and the gyroscope*/
-        enable_sensor(enAccel, enGyro, enTemp);
+        enable_sensor(enAccel, enGyro, enTemp, enMag);
         wait_ms(50);
 
         /* Enable cycle mode */
@@ -1124,7 +1124,7 @@ uint32_t ICM20649::enable_wake_on_motion(bool enable, uint8_t womThreshold, floa
         enable_cyclemode(false);
 
         /* Enable only the accelerometer */
-        enable_sensor(true, false, false);
+        enable_sensor(true, false, false, false);
 
         /* Set sample rate */
         set_sample_rate(sampleRate);
@@ -1146,13 +1146,17 @@ uint32_t ICM20649::enable_wake_on_motion(bool enable, uint8_t womThreshold, floa
         write_register(ICM20649_REG_ACCEL_WOM_THR, womThreshold);
 
         /* Enable low power mode */
-        enter_lowpowermode(true, false, false);
+        enter_lowpowermode(true, false, false, false);
     } else {
         /* Disable Wake On Motion feature */
         write_register(ICM20649_REG_ACCEL_INTEL_CTRL, 0x00);
 
         /* Disable the Wake On Motion interrupt */
         enable_irq(false, false);
+
+
+
+
 
         /* Disable cycle mode */
         enable_cyclemode(false);
@@ -1190,7 +1194,7 @@ uint32_t ICM20649::calibrate(float *accelBiasScaled, float *gyroBiasScaled)
     float gyroRes, accelRes;
 
     /* Enable the accelerometer and the gyro */
-    enable_sensor(true, true, false);
+    enable_sensor(true, true, false, false);
 
     /* Set 1kHz sample rate */
     set_sample_rate(1100.0);
@@ -1368,7 +1372,7 @@ uint32_t ICM20649::calibrate(float *accelBiasScaled, float *gyroBiasScaled)
     write_register(ICM20649_REG_USER_CTRL, 0x00);
 
     /* Disable all sensors */
-    enable_sensor(false, false, false);
+    enable_sensor(false, false, false, false);
 
     return ICM20649_OK;
 }
@@ -1396,7 +1400,7 @@ uint32_t ICM20649::calibrate_gyro(float *gyroBiasScaled)
     float gyroRes;
 
     /* Enable the accelerometer and the gyro */
-    enable_sensor(true, true, false);
+    enable_sensor(true, true, false, false);
 
     /* Set 1kHz sample rate */
     set_sample_rate(1100.0);
@@ -1515,7 +1519,7 @@ uint32_t ICM20649::calibrate_gyro(float *gyroBiasScaled)
     write_register(ICM20649_REG_USER_CTRL, 0x00);
 
     /* Disable all sensors */
-    enable_sensor(false, false, false);
+    enable_sensor(false, false, false, false);
 
     return ICM20649_OK;
 }

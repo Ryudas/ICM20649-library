@@ -154,15 +154,15 @@ private:
     uint32_t set_accel_bandwidth(uint8_t accelBw);
     uint32_t read_accel_data(float * accel);
     uint32_t read_gyro_data(float * gyro);
-    uint32_t read_mag_data(float * mag)
-    uint32_t get_accel_resolution(float *accelRes);
-    uint32_t get_gyro_resolution(float *gyroRes);
+    uint32_t read_mag_data(float * mag);
+    uint32_t get_accel_resolution(float * accelRes);
+    uint32_t get_gyro_resolution(float * gyroRes);
     uint32_t set_accel_fullscale(uint8_t accelFs);
     uint32_t set_gyro_fullscale(uint8_t gyroFs);
     uint32_t enable_sleepmode(bool enable);
     uint32_t enable_cyclemode(bool enable);
     uint32_t enable_sensor(bool accel, bool gyro, bool temp, bool mag);
-    uint32_t enter_lowpowermode(bool enAccel, bool enGyro, bool enTemp);
+    uint32_t enter_lowpowermode(bool enAccel, bool enGyro, bool enTemp, bool enMag);
     uint32_t enable_irq(bool dataReadyEnable, bool womEnable);
     uint32_t read_irqstatus(uint32_t * int_status);
     bool     is_data_ready(void);
