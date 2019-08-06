@@ -375,6 +375,32 @@ bool ICM20649::get_accelerometer(float *acc_x, float *acc_y, float *acc_z)
     return(true);
 }
 
+/** Do a measurement on the magnetometer
+ *
+ * @param[out] mag_x magnetometer measurement on X axis
+ * @param[out] mag_y magnetometer measurement on Y axis
+ * @param[out] mag_z magnetometer measurement on Z axis
+ *
+ * @returns true if measurement was successful
+ */
+bool ICM20649::get_magnetometer(float * mag_x, float * mag_y, float * mag_z)
+{
+	// buffer for data
+    float buf[3];
+
+    // if reading data from external sensor failed, return false
+    if(read_accel_data(buf)) {
+        return false;
+    }
+
+    // retrieving data 
+    *mag_x = buf[0];
+    *mag_y = buf[1];
+    *mag_z = buf[2];
+    
+    return(true);
+}
+
 bool ICM20649::get_temperature(float *temperature)
 {
     read_temperature(temperature);
