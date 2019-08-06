@@ -290,6 +290,7 @@ ICM20649::~ICM20649(void)
 {
 }
 
+// open ICM sensor and go through initialization procedures
 bool ICM20649::open()
 {
     uint8_t data;
@@ -394,9 +395,9 @@ bool ICM20649::get_magnetometer(float * mag_x, float * mag_y, float * mag_z)
     }
 
     // retrieving data 
-    *mag_x = buf[0];
-    *mag_y = buf[1];
-    *mag_z = buf[2];
+    (*mag_x) = buf[0];
+    (*mag_y) = buf[1];
+    (*mag_z) = buf[2];
     
     return(true);
 }
@@ -994,8 +995,12 @@ uint32_t ICM20649::enable_cyclemode(bool enable)
  ******************************************************************************/
 uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
 {
+	// Power management registers
     uint8_t pwrManagement1;
     uint8_t pwrManagement2;
+
+    // configuration for enabling data reading from I2C slave 0 (magnetometer) 
+    uint8_t SLV0_config;
 
     read_register(ICM20649_REG_PWR_MGMT_1, 1, &pwrManagement1);
     pwrManagement2 = 0;
@@ -1021,9 +1026,21 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
         pwrManagement1 |= ICM20649_BIT_TEMP_DIS;
     }
 
+    // enable external sensor on i2x slave 0 - the magnetometer by setting (bit 7)
+    // other configurations can be found in page 72 of datasheet
+    if ( mag ){
+    	SLV0_config = uint8_t( (1 << 7) | 0x06 );  
+    } else{
+    	SLV0_config = uint8_t( (0 << 7) | 0x06 );  
+
+    }
+
     /* Write back the modified values */
     write_register(ICM20649_REG_PWR_MGMT_1, pwrManagement1);
     write_register(ICM20649_REG_PWR_MGMT_2, pwrManagement2);
+
+    // Ext. Sensor Data config
+    write_register(ICM20649_REG_I2C_SLV0_CTRL, SLV0_config); 
 
     return ICM20649_OK;
 }
