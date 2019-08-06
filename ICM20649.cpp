@@ -116,8 +116,8 @@
 #define ICM20649_REG_GYRO_YOUT_L_SH      	(ICM20649_BANK_0 | 0x36)    /**< Gyroscope Y-axis data low byte                         */
 #define ICM20649_REG_GYRO_ZOUT_H_SH      	(ICM20649_BANK_0 | 0x37)    /**< Gyroscope Z-axis data high byte                        */
 #define ICM20649_REG_GYRO_ZOUT_L_SH      	(ICM20649_BANK_0 | 0x38)    /**< Gyroscope Z-axis data low byte                         */
-
-#define ICM20649_REG_EXT_SLV_SENS_DATA_00 
+	
+#define ICM20649_REG_EXT_SLV_SENS_DATA_00	(ICM20649_BANK_0 | 0x3B) 	/** External sensor data low byte for I2C slave 0**/
 
 
 #define ICM20649_REG_TEMPERATURE_H       	(ICM20649_BANK_0 | 0x39)    /**< Temperature data high byte                             */
@@ -738,23 +738,29 @@ uint32_t ICM20649::read_gyro_data(float *gyro)
  ******************************************************************************/
 uint32_t ICM20649::read_mag_data(float * mag)
 {
+	// 2 bits per axis
     uint8_t raw_data[6];
+    // temp axis value
     int16_t temp_value;
-    // flpat mag_res;
+    // float mag_res;
 
     /* Retrieve the magnetometer resolution (is this needed) */
     // get_mag_resolution(&mag_res);
 
     /* Read the six raw data registers into data array */
-    read_register( , 6, &rawData[0]);
+    read_register(ICM20649_REG_EXT_SLV_SENS_DATA_00, 6, &raw_data[0]);
 
-    /* Convert the MSB and LSB into a signed 16-bit value and multiply by the resolution to get the dps value */
-    temp_value = ( (int16_t) rawData[0] << 8) | rawData[1];
-    mag[0] = (float) temp_value; //* mag_res;
-    temp_value = ( (int16_t) rawData[2] << 8) | rawData[3];
-    mag[1] = (float) temp_value; //* mag_res;
-    temp_value = ( (int16_t) rawData[4] << 8) | rawData[5];
-    mag[2] = (float) temp_value; //* mag_res;
+    /* Convert the MSB and LSB into a signed 16-bit value 
+       and multiply by the resolution to get the dps value 
+	   odd numbered register ends 2byte axis read.	
+    */
+
+    temp_value = ( (int16_t) raw_data[1] << 8) | raw_data[0];
+    mag[0] = (float) temp_value; //* mag_res x axis;
+    temp_value = ( (int16_t) raw_data[3] << 8) | raw_data[2];
+    mag[1] = (float) temp_value; //* mag_res y axis;
+    temp_value = ( (int16_t) raw_data[5] << 8) | raw_data[4];
+    mag[2] = (float) temp_value; //* mag_res z axis;
 
     return ICM20649_OK;
 }
