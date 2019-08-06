@@ -724,6 +724,40 @@ uint32_t ICM20649::read_gyro_data(float *gyro)
 
 /***************************************************************************//**
  * @brief
+ *    Reads the raw magnetometer value and 
+ *
+ * @param[out] gyro
+ *    A 3-element array of float numbers containing the magnetometer values
+ *    for the x, y and z axes.
+ *
+ * @return
+ *    Returns zero on OK, non-zero otherwise
+ ******************************************************************************/
+uint32_t ICM20649::read_mag_data(float * mag)
+{
+    uint8_t raw_data[6];
+    int16_t temp_value;
+    // flpat mag_res;
+
+    /* Retrieve the magnetometer resolution (is this needed) */
+    // get_mag_resolution(&mag_res);
+
+    /* Read the six raw data registers into data array */
+    read_register(ICM20649_REG_GYRO_XOUT_H_SH, 6, &rawData[0]);
+
+    /* Convert the MSB and LSB into a signed 16-bit value and multiply by the resolution to get the dps value */
+    temp_value = ( (int16_t) rawData[0] << 8) | rawData[1];
+    mag[0] = (float) temp_value; //* mag_res;
+    temp_value = ( (int16_t) rawData[2] << 8) | rawData[3];
+    mag[1] = (float) temp_value; //* mag_res;
+    temp_value = ( (int16_t) rawData[4] << 8) | rawData[5];
+    mag[2] = (float) temp_value; //* mag_res;
+
+    return ICM20649_OK;
+}
+
+/***************************************************************************//**
+ * @brief
  *    Gets the actual resolution of the accelerometer
  *
  * @param[out] accelRes
