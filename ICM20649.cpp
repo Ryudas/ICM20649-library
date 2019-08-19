@@ -390,7 +390,7 @@ bool ICM20649::get_magnetometer(float * mag_x, float * mag_y, float * mag_z)
     float buf[3];
 
     // if reading data from external sensor failed, return false
-    if(read_accel_data(buf)) {
+    if(read_mag_data(buf)) {
         return false;
     }
 
