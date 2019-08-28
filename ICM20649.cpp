@@ -328,7 +328,8 @@ bool ICM20649::open()
  */
 bool ICM20649::measure()
 {
-    // fix this
+    // enable all sensors
+    enable_sensor(true, true, true, true);
     return(true);
 }
 
@@ -1000,7 +1001,7 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
     uint8_t pwrManagement2;
 
     // configuration for enabling data reading from I2C slave 0 (magnetometer) 
-    uint8_t SLV0_config;
+    uint8_t SLV0_config, SLV0_addr, SLV0_reg;
 
     read_register(ICM20649_REG_PWR_MGMT_1, 1, &pwrManagement1);
     pwrManagement2 = 0;
@@ -1029,7 +1030,14 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
     // enable external sensor on i2x slave 0 - the magnetometer by setting (bit 7)
     // other configurations can be found in page 72 of datasheet
     if ( mag ){
-    	SLV0_config = uint8_t( (1 << 7) | 0x06 );  
+    	
+    	SLV0_config = uint8_t( (1 << 7) | 0x06 ); 
+    	// compass physical slave adress 1 of 4 options(0x19, 0x1b, 0x1d, 0x1f)
+    	SLV0_addr = 0x1f;
+    	//  I2C slave register address for data transfer
+    	SLV0_reg = 0x03;
+    	
+    	  
     } else{
     	SLV0_config = uint8_t( (0 << 7) | 0x06 );  
 
@@ -1040,7 +1048,9 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
     write_register(ICM20649_REG_PWR_MGMT_2, pwrManagement2);
 
     // Ext. Sensor Data config
-    write_register(ICM20649_REG_I2C_SLV0_CTRL, SLV0_config); 
+    write_register(ICM20649_REG_I2C_SLV0_ADDR, SLV0_addr);
+    write_register(ICM20649_REG_I2C_SLV0_CTRL, SLV0_config);
+    write_register(ICM20649_REG_I2C_SLV0_REG, SLV0_config);
 
     return ICM20649_OK;
 }
