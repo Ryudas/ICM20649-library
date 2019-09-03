@@ -51,6 +51,8 @@
 /***********************/
 /* Bank 0 register map */
 /***********************/
+
+#define AK8963C_REG_WHO_AM_I				(ICM20649_BANK_0 | 0x01)
 #define ICM20649_REG_WHO_AM_I            	(ICM20649_BANK_0 | 0x00)    /**< Device ID register                                     */
 
 #define ICM20649_REG_USER_CTRL           	(ICM20649_BANK_0 | 0x03)    /**< User control register                                  */
@@ -293,17 +295,22 @@ ICM20649::~ICM20649(void)
 // open ICM sensor and go through initialization procedures
 bool ICM20649::open()
 {
-    uint8_t data;
+    uint8_t data, data2;
 
     reset();
 
     /* Disable I2C interface, use SPI */
-    write_register(ICM20649_REG_USER_CTRL, ICM20649_BIT_I2C_IF_DIS);
+    //write_register(ICM20649_REG_USER_CTRL, ICM20649_BIT_I2C_IF_DIS);
+    write_register(ICM20649_REG_USER_CTRL, 0x80);
 
-    /* Read Who am I register, should get 0x71 */
+    /* Read Who am I register, should get 0xE1 */
     //printf("Data var, Who am i reg");
+    
+    printf("WHO AM I Registers\n");
     read_register(ICM20649_REG_WHO_AM_I, 1, &data);
     printf("%#010x\n", data);
+    
+
 
     /* If not - return */
     if ( (data != ICM20649_DEVICE_ID) && (data != ICM20948_DEVICE_ID) ) {
@@ -319,6 +326,10 @@ bool ICM20649::open()
     /* INT pin: active low, open drain, IT status read clears. It seems that latched mode does not work, the INT pin cannot be cleared if set */
     write_register(ICM20649_REG_INT_PIN_CFG, ICM20649_BIT_INT_ACTL | ICM20649_BIT_INT_OPEN);
 
+
+
+    // enable all sensors
+    enable_sensor(true, true, true, true); 
     return true;
 }
 
@@ -327,9 +338,10 @@ bool ICM20649::open()
  * @returns true if measurement was successful
  */
 bool ICM20649::measure()
-{
-    // enable all sensors
-    enable_sensor(true, true, true, true);
+{  
+
+	
+    // fix this
     return(true);
 }
 
@@ -1001,7 +1013,7 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
     uint8_t pwrManagement2;
 
     // configuration for enabling data reading from I2C slave 0 (magnetometer) 
-    uint8_t SLV0_config, SLV0_addr, SLV0_reg;
+    uint8_t SLV0_config, SLV0_addr, SLV0_reg, data;
 
     read_register(ICM20649_REG_PWR_MGMT_1, 1, &pwrManagement1);
     pwrManagement2 = 0;
@@ -1030,14 +1042,14 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
     // enable external sensor on i2x slave 0 - the magnetometer by setting (bit 7)
     // other configurations can be found in page 72 of datasheet
     if ( mag ){
-    	
-    	SLV0_config = uint8_t( (1 << 7) | 0x06 ); 
+    	SLV0_config = uint8_t( (1 << 7) | 0x01 ); 
     	// compass physical slave adress 1 of 4 options(0x19, 0x1b, 0x1d, 0x1f)
     	SLV0_addr = 0x1f;
     	//  I2C slave register address for data transfer
-    	SLV0_reg = 0x03;
+    	SLV0_reg = 0x01;
     	
-    	  
+    	
+    	 
     } else{
     	SLV0_config = uint8_t( (0 << 7) | 0x06 );  
 
@@ -1047,11 +1059,32 @@ uint32_t ICM20649::enable_sensor(bool accel, bool gyro, bool temp, bool mag)
     write_register(ICM20649_REG_PWR_MGMT_1, pwrManagement1);
     write_register(ICM20649_REG_PWR_MGMT_2, pwrManagement2);
 
-    // Ext. Sensor Data config
-    write_register(ICM20649_REG_I2C_SLV0_ADDR, SLV0_addr);
-    write_register(ICM20649_REG_I2C_SLV0_CTRL, SLV0_config);
-    write_register(ICM20649_REG_I2C_SLV0_REG, SLV0_config);
 
+    // Ext. Sensor Data config
+    //write_register(ICM20649_REG_I2C_MST_CTRL, 1 << 7);
+    //read_register(ICM20649_REG_I2C_MST_CTRL, 1, &data);
+    //printf("0:\n");
+    //printf("%#010x\n", data);
+    
+    write_register(ICM20649_REG_I2C_SLV0_ADDR, SLV0_addr);
+    read_register(ICM20649_REG_I2C_SLV0_ADDR, 1, &data);
+    printf("1:\n");
+    printf("%#010x\n", data);
+    
+    write_register(ICM20649_REG_I2C_SLV0_CTRL, SLV0_config);
+    read_register(ICM20649_REG_I2C_SLV0_CTRL, 1, &data);
+    printf("2:\n");
+    printf("%#010x\n", data);
+    
+    write_register(ICM20649_REG_I2C_SLV0_REG, SLV0_reg);
+    read_register(ICM20649_REG_I2C_SLV0_REG, 1, &data);
+    printf("3:\n");
+    printf("%#010x\n", data);
+    
+    read_register(ICM20649_REG_EXT_SLV_SENS_DATA_00, 1, &data);
+    printf("3:\n");
+    printf("%#010x\n", data);
+    
     return ICM20649_OK;
 }
 
